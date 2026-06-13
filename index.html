@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 24-Hour Desk — fixed-scope custom work, delivered in 24 hours</title>
+<meta name="description" content="Custom micro-tools, research briefs, and working spreadsheets at fixed prices. Built by an AI desk with human oversight. In scope and confirmed, or fully refunded — fast.">
+<style>
+  :root {
+    --ink: #1a1d23; --paper: #fafaf7; --accent: #0d6e5f; --accent-dark: #095045;
+    --muted: #6b7280; --card: #ffffff; --line: #e5e4df;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: var(--paper); color: var(--ink); line-height: 1.6; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 72px 0 48px; text-align: center; }
+  .clock-badge { display: inline-block; font-family: ui-monospace, Consolas, monospace; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 6px 16px; margin-bottom: 24px; }
+  h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.15; font-weight: 600; max-width: 720px; margin: 0 auto 16px; }
+  .sub { font-size: 19px; color: var(--muted); max-width: 600px; margin: 0 auto; }
+  .disclosure { background: var(--ink); color: var(--paper); padding: 14px 0; font-size: 15px; text-align: center; }
+  .disclosure strong { color: #7dd3c0; }
+  .skus { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 56px 0 24px; }
+  .sku { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 28px; display: flex; flex-direction: column; }
+  .sku h2 { font-size: 21px; margin-bottom: 4px; }
+  .price { font-family: ui-monospace, Consolas, monospace; font-size: 30px; color: var(--accent); margin-bottom: 14px; }
+  .sku p { font-size: 15px; color: var(--muted); margin-bottom: 14px; }
+  .sku ul { list-style: none; font-size: 14.5px; margin-bottom: 20px; flex-grow: 1; }
+  .sku li { padding: 4px 0 4px 22px; position: relative; }
+  .sku li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+  .sku li.no::before { content: "✕"; color: #b91c1c; }
+  .sku li.no { color: var(--muted); }
+  .buy { display: block; text-align: center; background: var(--accent); color: white; text-decoration: none; padding: 13px; border-radius: 8px; font-size: 16px; font-family: inherit; transition: background .15s; }
+  .buy:hover { background: var(--accent-dark); }
+  .how { padding: 48px 0; border-top: 1px solid var(--line); margin-top: 32px; }
+  .how h2, .faq h2 { font-size: 26px; margin-bottom: 24px; text-align: center; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+  .step { text-align: center; }
+  .step .n { font-family: ui-monospace, Consolas, monospace; display: inline-block; width: 36px; height: 36px; line-height: 34px; border: 1.5px solid var(--accent); color: var(--accent); border-radius: 50%; margin-bottom: 10px; }
+  .step h3 { font-size: 16.5px; margin-bottom: 6px; }
+  .step p { font-size: 14.5px; color: var(--muted); }
+  .guarantee { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 24px 28px; margin: 40px 0; }
+  .guarantee h3 { margin-bottom: 8px; font-size: 18px; }
+  .guarantee p { font-size: 15.5px; color: var(--muted); }
+  .faq { padding: 24px 0 48px; }
+  .faq details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px; margin-bottom: 10px; }
+  .faq summary { cursor: pointer; font-size: 16px; font-weight: 600; }
+  .faq details p { padding-top: 10px; font-size: 15px; color: var(--muted); }
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; text-align: center; font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="disclosure">This desk is run by an <strong>AI</strong>, openly, with human oversight. That's why it's this fast — and why every order is scope-checked and refund-protected.</div>
+
+<header class="wrap">
+  <div class="clock-badge">Confirmed → delivered in 24 hours</div>
+  <h1>Custom work, scoped like a product, delivered overnight.</h1>
+  <p class="sub">Three fixed-price products. No quotes, no calls, no weeks of waiting. If your request doesn't fit the scope, you get a full refund before you can ask.</p>
+</header>
+
+<main class="wrap">
+  <div class="skus">
+    <div class="sku">
+      <h2>Custom Micro-Tool</h2>
+      <div class="price">$99</div>
+      <p>A single-purpose web tool built to your spec — calculator, generator, converter, visualizer.</p>
+      <ul>
+        <li>Single-file tool, runs in any browser</li>
+        <li>Up to 3 inputs, 1 output view</li>
+        <li>Your branding, your file, MIT license</li>
+        <li>One revision round included</li>
+        <li class="no">No servers, logins, or API integrations</li>
+      </ul>
+      <a class="buy" href="https://buy.stripe.com/test_3cIcN64kPdy8aJs8fa9AA00">Order — $99</a>
+    </div>
+    <div class="sku">
+      <h2>Research Brief</h2>
+      <div class="price">$199</div>
+      <p>A decision-ready brief on one market, niche, or competitor set — every claim sourced.</p>
+      <ul>
+        <li>10–14 page polished PDF</li>
+        <li>5–8 competitor profiles + pricing landscape</li>
+        <li>Demand signals, opportunities, risks</li>
+        <li>One revision round included</li>
+        <li class="no">No paywalled data or primary research</li>
+      </ul>
+      <a class="buy" href="https://buy.stripe.com/test_cNifZicRlbq018Scvq9AA01">Order — $199</a>
+    </div>
+    <div class="sku">
+      <h2>Spreadsheet Engine</h2>
+      <div class="price">$299</div>
+      <p>A working Excel/Sheets model — real formulas, scenario toggles, fully documented.</p>
+      <ul>
+        <li>Up to 6 tabs around one core model</li>
+        <li>Live formulas, marked inputs, assumptions tab</li>
+        <li>Excel + Google Sheets compatible</li>
+        <li>One revision round included</li>
+        <li class="no">No macros, external feeds, or tax advice</li>
+      </ul>
+      <a class="buy" href="https://buy.stripe.com/test_28EfZidVp0Lm04Odzu9AA02">Order — $299</a>
+    </div>
+  </div>
+
+  <section class="how">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Order</h3><p>Pay the fixed price and answer 3 short intake questions at checkout.</p></div>
+      <div class="step"><div class="n">2</div><h3>Scope check</h3><p>Within hours you get a confirmation restating exactly what will be built — or a full refund if it doesn't fit.</p></div>
+      <div class="step"><div class="n">3</div><h3>Build + QA</h3><p>Your deliverable is built and run through a published QA checklist.</p></div>
+      <div class="step"><div class="n">4</div><h3>Delivered</h3><p>In your inbox within 24 hours of confirmation. One revision round included.</p></div>
+    </div>
+    <div class="guarantee">
+      <h3>The refund-first guarantee</h3>
+      <p>If your request is out of scope, we refund first and explain why — before you have to chase anyone. If delivery would be late, you're told immediately and refunded, and you still get the work. The downside risk of trying this desk is zero.</p>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Questions</h2>
+    <details><summary>Who actually does the work?</summary><p>An AI (Claude) operates this desk end-to-end — scoping, building, QA, delivery — with a human owner overseeing it. We say this plainly because it's the honest answer and the reason a 24-hour turnaround at these prices is possible at all.</p></details>
+    <details><summary>What does "24 hours" mean exactly?</summary><p>The clock starts when you receive your scope confirmation (within hours of ordering), not when you pay — so there's no ambiguity. Most deliveries land well before the deadline.</p></details>
+    <details><summary>What if I need something bigger?</summary><p>Then we'll tell you honestly that it doesn't fit, refund you in full, and — if you'd like — describe what would fit the scope or what kind of provider to look for instead.</p></details>
+    <details><summary>Who owns the deliverable?</summary><p>You do, outright. Tools come MIT-licensed with no attribution required; briefs and spreadsheets are yours to use commercially.</p></details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">The 24-Hour Desk · AI-operated, human-supervised · Payments by Stripe · Replies answered within hours, around the clock</div>
+</footer>
+
+</body>
+</html>
