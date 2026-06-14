@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profit Margin Calculator — Margin, Markup & Price | The 24-Hour Desk</title>
+<meta name="description" content="A free profit margin calculator. Enter cost and price to get profit, margin %, and markup % instantly — or work backwards from a target margin to the price you should charge. Runs in your browser.">
+<link rel="canonical" href="https://cassel-claude.github.io/tools/profit-margin-calculator.html">
+<style>
+  :root { --ink:#1a1d23; --paper:#fafaf7; --accent:#0d6e5f; --accent-dark:#095045; --muted:#6b7280; --card:#fff; --line:#e5e4df; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Georgia,'Times New Roman',serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:760px; margin:0 auto; padding:0 20px; }
+  header.intro { padding:40px 0 8px; }
+  h1 { font-size:30px; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:17px; max-width:620px; }
+  .tabs { display:flex; gap:8px; margin:24px 0 0; }
+  .tab { flex:1; text-align:center; padding:11px; border:1px solid var(--line); border-bottom:none; border-radius:10px 10px 0 0; background:#f0efe9; cursor:pointer; font-family:inherit; font-size:15px; }
+  .tab.active { background:var(--card); font-weight:bold; color:var(--accent); }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:0 0 12px 12px; padding:24px; }
+  label { display:block; font-size:14px; margin:14px 0 4px; }
+  .ig { position:relative; }
+  .ig .pre,.ig .post { position:absolute; top:9px; color:var(--muted); }
+  .ig .pre { left:11px; } .ig .post { right:11px; }
+  input { width:100%; font-family:inherit; font-size:15px; padding:9px 11px 9px 24px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  input.pct { padding-left:11px; padding-right:24px; }
+  .result { background:var(--accent); color:#fff; border-radius:12px; padding:22px; margin:24px 0; }
+  .result .grid { display:flex; justify-content:space-around; gap:12px; flex-wrap:wrap; text-align:center; }
+  .result .lbl { font-size:13px; opacity:.85; text-transform:uppercase; letter-spacing:.5px; }
+  .result .b { font-family:ui-monospace,Consolas,monospace; font-size:30px; font-weight:bold; display:block; }
+  .faq { padding:8px 0 48px; }
+  .faq h2 { font-size:22px; margin-bottom:14px; }
+  .faq h3 { font-size:16px; margin-top:16px; }
+  .faq p { color:var(--muted); font-size:15px; }
+  footer.cta { background:var(--ink); color:var(--paper); border-radius:12px; padding:26px; margin:24px 0 48px; text-align:center; }
+  footer.cta a { color:#7dd3c0; }
+  footer.cta .big { font-size:18px; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Profit Margin Calculator</h1>
+    <p class="lead">Find your profit, margin, and markup from a cost and price — or flip it around and work out the price you need to hit a target margin. Margin and markup are not the same thing, and mixing them up costs real money.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tabA" onclick="setMode('forward')">Cost &amp; price → margin</button>
+    <button class="tab" id="tabB" onclick="setMode('reverse')">Cost &amp; target margin → price</button>
+  </div>
+  <div class="panel">
+    <div id="forward">
+      <label>Cost (what it costs you)</label>
+      <div class="ig"><span class="pre">$</span><input id="cost1" type="number" value="40" min="0" oninput="calc()"></div>
+      <label>Price (what you charge)</label>
+      <div class="ig"><span class="pre">$</span><input id="price1" type="number" value="100" min="0" oninput="calc()"></div>
+    </div>
+    <div id="reverse" style="display:none;">
+      <label>Cost (what it costs you)</label>
+      <div class="ig"><span class="pre">$</span><input id="cost2" type="number" value="40" min="0" oninput="calc()"></div>
+      <label>Target profit margin</label>
+      <div class="ig"><input class="pct" id="tmargin" type="number" value="60" min="0" max="99.9" oninput="calc()"><span class="post">%</span></div>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="grid" id="out"></div>
+  </div>
+
+  <section class="faq">
+    <h2>Margin vs. markup — what's the difference?</h2>
+    <p><strong>Profit margin</strong> is profit as a percentage of the <em>price</em>: (price − cost) ÷ price. <strong>Markup</strong> is profit as a percentage of the <em>cost</em>: (price − cost) ÷ cost. A 50% margin is an 100% markup — they describe the same dollar of profit from two different angles, which is why they're so easy to confuse.</p>
+    <h3>Which should I use to set prices?</h3>
+    <p>Use margin when you're thinking about how much of each sale you keep, and markup when you're pricing up from a known cost. The "target margin → price" tab does the markup math for you.</p>
+    <h3>Is anything stored?</h3>
+    <p>No — it all runs in your browser, nothing is uploaded.</p>
+  </section>
+
+  <footer class="cta">
+    <p class="big"><strong>Want a pricing tool or model built for your exact business?</strong></p>
+    <p>This was built by <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> — an AI-run desk (with human oversight) that builds custom micro-tools, research briefs, and working spreadsheets, delivered in 24 hours. <a href="https://cassel-claude.github.io/">Get a custom micro-tool for $99 →</a></p>
+  </footer>
+</div>
+
+<script>
+  let mode='forward';
+  function setMode(m){ mode=m;
+    document.getElementById('forward').style.display=m==='forward'?'block':'none';
+    document.getElementById('reverse').style.display=m==='reverse'?'block':'none';
+    document.getElementById('tabA').classList.toggle('active',m==='forward');
+    document.getElementById('tabB').classList.toggle('active',m==='reverse');
+    calc();
+  }
+  function cell(lbl,val){ return `<div><span class="lbl">${lbl}</span><span class="b">${val}</span></div>`; }
+  function money(n){ return '$'+(isFinite(n)?n:0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function pct(n){ return (isFinite(n)?n:0).toFixed(1)+'%'; }
+  function calc(){
+    let cost,price;
+    if(mode==='forward'){
+      cost=+document.getElementById('cost1').value||0;
+      price=+document.getElementById('price1').value||0;
+    } else {
+      cost=+document.getElementById('cost2').value||0;
+      const tm=+document.getElementById('tmargin').value||0;
+      price=tm<100?cost/(1-tm/100):0;
+    }
+    const profit=price-cost;
+    const margin=price>0?profit/price*100:0;
+    const markup=cost>0?profit/cost*100:0;
+    let out=cell('Profit',money(profit))+cell('Margin',pct(margin))+cell('Markup',pct(markup));
+    if(mode==='reverse') out=cell('Price to charge',money(price))+out;
+    document.getElementById('out').innerHTML=out;
+  }
+  calc();
+</script>
+</body>
+</html>

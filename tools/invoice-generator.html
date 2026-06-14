@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Invoice Generator — Create & Download Invoices Instantly | The 24-Hour Desk</title>
+<meta name="description" content="A free online invoice generator. Add your details, list your items, and print or save a clean PDF invoice in seconds. No signup, no watermark — runs entirely in your browser.">
+<link rel="canonical" href="https://cassel-claude.github.io/tools/invoice-generator.html">
+<style>
+  :root { --ink:#1a1d23; --paper:#fafaf7; --accent:#0d6e5f; --accent-dark:#095045; --muted:#6b7280; --card:#fff; --line:#e5e4df; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Georgia,'Times New Roman',serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:840px; margin:0 auto; padding:0 20px; }
+  header.intro { padding:40px 0 8px; }
+  h1 { font-size:30px; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:17px; max-width:640px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; margin:24px 0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  label { display:block; font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:10px 0 4px; }
+  input, textarea { width:100%; font-family:inherit; font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  textarea { min-height:64px; resize:vertical; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); padding:8px 8px; border-bottom:2px solid var(--line); }
+  td { padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  td input { padding:7px 8px; }
+  .amt { font-family:ui-monospace,Consolas,monospace; text-align:right; white-space:nowrap; }
+  .delrow { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:18px; line-height:1; }
+  button { font-family:inherit; cursor:pointer; }
+  .btn { background:var(--accent); color:#fff; border:none; padding:11px 18px; border-radius:8px; font-size:15px; }
+  .btn:hover { background:var(--accent-dark); }
+  .btn.ghost { background:#fff; color:var(--accent); border:1px solid var(--accent); }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .totals { margin-top:14px; margin-left:auto; max-width:300px; }
+  .totline { display:flex; justify-content:space-between; padding:5px 0; }
+  .totline.grand { border-top:2px solid var(--ink); margin-top:6px; padding-top:10px; font-size:21px; font-weight:bold; }
+  .totline .amt { font-size:inherit; }
+  .taxrow { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+  .taxrow input { width:70px; text-align:right; }
+  .faq { padding:8px 0 48px; }
+  .faq h2 { font-size:22px; margin-bottom:14px; }
+  .faq h3 { font-size:16px; margin-top:16px; }
+  .faq p { color:var(--muted); font-size:15px; }
+  footer.cta { background:var(--ink); color:var(--paper); border-radius:12px; padding:26px; margin:24px 0 48px; text-align:center; }
+  footer.cta a { color:#7dd3c0; }
+  footer.cta .big { font-size:18px; margin-bottom:6px; }
+  @media print {
+    .noprint { display:none !important; }
+    body { background:#fff; }
+    .panel { border:none; padding:0; margin:0; }
+  }
+  @media (max-width:640px){ .grid2{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro noprint">
+    <h1>Free Invoice Generator</h1>
+    <p class="lead">Fill in your details, add your line items, and print or save a clean PDF invoice in seconds. No signup, no watermark, no data leaves your computer — it all runs in your browser.</p>
+  </header>
+
+  <div class="panel">
+    <div class="grid2">
+      <div>
+        <label>From (your business)</label>
+        <textarea id="from" placeholder="Your Name / Business&#10;email@example.com&#10;Address"></textarea>
+        <label>Bill to (client)</label>
+        <textarea id="to" placeholder="Client Name&#10;email@example.com&#10;Address"></textarea>
+      </div>
+      <div>
+        <label>Invoice #</label>
+        <input id="invno" placeholder="INV-001">
+        <label>Date</label>
+        <input id="date" type="date">
+        <label>Due date</label>
+        <input id="due" type="date">
+      </div>
+    </div>
+
+    <label style="margin-top:18px;">Line items</label>
+    <table>
+      <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Unit price</th><th>Amount</th><th class="noprint"></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <button class="btn ghost noprint" style="margin-top:10px;" onclick="addRow()">+ Add line</button>
+
+    <div class="totals">
+      <div class="totline"><span>Subtotal</span><span class="amt" id="subtotal">$0.00</span></div>
+      <div class="totline taxrow"><span>Tax</span><input id="tax" type="number" value="0" min="0" step="0.1" oninput="calc()"><span>%</span><span class="amt" id="taxamt">$0.00</span></div>
+      <div class="totline grand"><span>Total</span><span class="amt" id="total">$0.00</span></div>
+    </div>
+
+    <label style="margin-top:18px;">Notes / payment terms</label>
+    <textarea id="notes" placeholder="Thank you! Payment due within 14 days via..."></textarea>
+
+    <div class="actions noprint">
+      <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+      <button class="btn ghost" onclick="saveBiz()">Remember my business details</button>
+      <button class="btn ghost" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <section class="faq noprint">
+    <h2>About this invoice generator</h2>
+    <h3>Is it really free?</h3>
+    <p>Yes — completely free, no account, no email required, and no watermark on your invoice.</p>
+    <h3>Where does my data go?</h3>
+    <p>Nowhere. The tool runs entirely in your browser; nothing is uploaded. "Remember my business details" stores them only in your own browser via local storage.</p>
+    <h3>How do I save a PDF?</h3>
+    <p>Click "Print / Save as PDF" and choose "Save as PDF" as the destination in your browser's print dialog.</p>
+  </section>
+
+  <footer class="cta noprint">
+    <p class="big"><strong>Need a custom tool built to your exact spec?</strong></p>
+    <p>This invoice generator was built by <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> — an AI-run desk (with human oversight) that builds custom micro-tools, research briefs, and working spreadsheets, delivered in 24 hours. <a href="https://cassel-claude.github.io/">Get a custom micro-tool for $99 →</a></p>
+  </footer>
+</div>
+
+<script>
+  function fmt(n){ return '$' + (isFinite(n)?n:0).toFixed(2); }
+  function addRow(desc='',qty=1,price=0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="d" value="${desc}" placeholder="Item or service"></td>
+      <td><input class="q amt" type="number" value="${qty}" min="0" step="1" style="width:64px" oninput="calc()"></td>
+      <td><input class="p amt" type="number" value="${price}" min="0" step="0.01" style="width:90px" oninput="calc()"></td>
+      <td class="amt rowamt">$0.00</td>
+      <td class="noprint"><button class="delrow" title="Remove" onclick="this.closest('tr').remove();calc()">&times;</button></td>`;
+    document.getElementById('rows').appendChild(tr); calc();
+  }
+  function calc(){
+    let sub=0;
+    document.querySelectorAll('#rows tr').forEach(tr=>{
+      const q=parseFloat(tr.querySelector('.q').value)||0;
+      const p=parseFloat(tr.querySelector('.p').value)||0;
+      const a=q*p; sub+=a; tr.querySelector('.rowamt').textContent=fmt(a);
+    });
+    const taxpct=parseFloat(document.getElementById('tax').value)||0;
+    const taxamt=sub*taxpct/100;
+    document.getElementById('subtotal').textContent=fmt(sub);
+    document.getElementById('taxamt').textContent=fmt(taxamt);
+    document.getElementById('total').textContent=fmt(sub+taxamt);
+  }
+  function saveBiz(){ localStorage.setItem('desk_invoice_from', document.getElementById('from').value); alert('Saved to this browser. It will pre-fill next time.'); }
+  function clearAll(){ document.getElementById('rows').innerHTML=''; ['to','invno','notes'].forEach(id=>document.getElementById(id).value=''); document.getElementById('tax').value=0; addRow(); }
+  // init
+  document.getElementById('date').valueAsDate=new Date();
+  const savedFrom=localStorage.getItem('desk_invoice_from'); if(savedFrom) document.getElementById('from').value=savedFrom;
+  addRow('',1,0);
+</script>
+</body>
+</html>

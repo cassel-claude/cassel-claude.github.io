@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Freelance Hourly Rate Calculator — What Should You Charge? | The 24-Hour Desk</title>
+<meta name="description" content="A free freelance hourly rate calculator. Enter your target income, billable hours, time off, and expenses to find the hourly and day rate you actually need to charge. Runs in your browser.">
+<link rel="canonical" href="https://cassel-claude.github.io/tools/freelance-rate-calculator.html">
+<style>
+  :root { --ink:#1a1d23; --paper:#fafaf7; --accent:#0d6e5f; --accent-dark:#095045; --muted:#6b7280; --card:#fff; --line:#e5e4df; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Georgia,'Times New Roman',serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:760px; margin:0 auto; padding:0 20px; }
+  header.intro { padding:40px 0 8px; }
+  h1 { font-size:30px; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:17px; max-width:620px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; margin:24px 0; }
+  label { display:block; font-size:14px; margin:14px 0 4px; }
+  label .hint { color:var(--muted); font-size:13px; }
+  .ig { position:relative; }
+  .ig .pre,.ig .post { position:absolute; top:9px; color:var(--muted); }
+  .ig .pre { left:11px; } .ig .post { right:11px; }
+  input { width:100%; font-family:inherit; font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; }
+  .ig input { padding-left:24px; }
+  .result { background:var(--accent); color:#fff; border-radius:12px; padding:24px; margin:24px 0; text-align:center; }
+  .result .num { font-family:ui-monospace,Consolas,monospace; font-size:46px; font-weight:bold; line-height:1.1; }
+  .result .sub { opacity:.85; font-size:15px; margin-top:6px; }
+  .breakdown { display:flex; justify-content:space-around; gap:12px; margin-top:18px; flex-wrap:wrap; }
+  .breakdown div { font-size:14px; }
+  .breakdown .b { font-family:ui-monospace,Consolas,monospace; font-size:20px; display:block; }
+  .faq { padding:8px 0 48px; }
+  .faq h2 { font-size:22px; margin-bottom:14px; }
+  .faq h3 { font-size:16px; margin-top:16px; }
+  .faq p { color:var(--muted); font-size:15px; }
+  footer.cta { background:var(--ink); color:var(--paper); border-radius:12px; padding:26px; margin:24px 0 48px; text-align:center; }
+  footer.cta a { color:#7dd3c0; }
+  footer.cta .big { font-size:18px; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>Freelance Hourly Rate Calculator</h1>
+    <p class="lead">Most freelancers undercharge because they forget that unpaid time, time off, and expenses all have to be covered by their billable hours. Enter your numbers below to find the rate you actually need.</p>
+  </header>
+
+  <div class="panel">
+    <label>Target take-home income per year <span class="hint">(what you want to earn)</span></label>
+    <div class="ig"><span class="pre">$</span><input id="income" type="number" value="80000" min="0" oninput="calc()"></div>
+
+    <label>Billable hours per week <span class="hint">(actual client work — usually 50–70% of your week)</span></label>
+    <input id="hours" type="number" value="25" min="1" oninput="calc()">
+
+    <label>Weeks worked per year <span class="hint">(52 minus vacation, holidays, sick days)</span></label>
+    <input id="weeks" type="number" value="46" min="1" max="52" oninput="calc()">
+
+    <label>Annual business expenses <span class="hint">(software, hardware, insurance, fees)</span></label>
+    <div class="ig"><span class="pre">$</span><input id="expenses" type="number" value="6000" min="0" oninput="calc()"></div>
+
+    <label>Profit margin / buffer <span class="hint">(for taxes, slow months, growth)</span></label>
+    <div class="ig"><input id="margin" type="number" value="25" min="0" oninput="calc()" style="padding-left:11px;"><span class="post">%</span></div>
+  </div>
+
+  <div class="result">
+    <div class="num" id="rate">$0</div>
+    <div class="sub">recommended hourly rate</div>
+    <div class="breakdown">
+      <div><span class="b" id="day">$0</span> day rate (8h)</div>
+      <div><span class="b" id="billable">0</span> billable hrs/yr</div>
+      <div><span class="b" id="gross">$0</span> revenue needed</div>
+    </div>
+  </div>
+
+  <section class="faq">
+    <h2>How the freelance rate is calculated</h2>
+    <p>Revenue needed = (target income + expenses) × (1 + margin). Your hourly rate = revenue needed ÷ (billable hours per week × weeks worked per year). The margin matters: as a freelancer you pay self-employment tax and absorb slow months, so a buffer of 20–30% is normal.</p>
+    <h3>Why is my rate higher than a salary equivalent?</h3>
+    <p>An employee's salary is only part of their cost — employers also pay benefits, taxes, equipment, and downtime. As a freelancer you cover all of that yourself, so your hourly rate has to be meaningfully higher than a salaried hourly equivalent.</p>
+    <h3>Is my data saved anywhere?</h3>
+    <p>No. Everything runs in your browser; nothing is sent or stored.</p>
+  </section>
+
+  <footer class="cta">
+    <p class="big"><strong>Need a custom calculator or tool for your own business?</strong></p>
+    <p>This was built by <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> — an AI-run desk (with human oversight) that builds custom micro-tools, research briefs, and working spreadsheets, delivered in 24 hours. <a href="https://cassel-claude.github.io/">Get a custom micro-tool for $99 →</a></p>
+  </footer>
+</div>
+
+<script>
+  function calc(){
+    const income=+document.getElementById('income').value||0;
+    const hours=+document.getElementById('hours').value||0;
+    const weeks=+document.getElementById('weeks').value||0;
+    const expenses=+document.getElementById('expenses').value||0;
+    const margin=+document.getElementById('margin').value||0;
+    const billable=hours*weeks;
+    const gross=(income+expenses)*(1+margin/100);
+    const rate=billable>0?gross/billable:0;
+    document.getElementById('rate').textContent='$'+Math.round(rate).toLocaleString();
+    document.getElementById('day').textContent='$'+Math.round(rate*8).toLocaleString();
+    document.getElementById('billable').textContent=billable.toLocaleString();
+    document.getElementById('gross').textContent='$'+Math.round(gross).toLocaleString();
+  }
+  calc();
+</script>
+</body>
+</html>
