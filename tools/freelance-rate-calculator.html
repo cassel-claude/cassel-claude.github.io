@@ -23,11 +23,11 @@
   input { width:100%; font-family:inherit; font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; }
   .ig input { padding-left:24px; }
   .result { background:var(--accent); color:#fff; border-radius:12px; padding:24px; margin:24px 0; text-align:center; }
-  .result .num { font-family:ui-monospace,Consolas,monospace; font-size:46px; font-weight:bold; line-height:1.1; }
+  .result .num { font-family:ui-monospace,Consolas,monospace; font-size:clamp(32px,11vw,46px); font-weight:bold; line-height:1.1; overflow-wrap:anywhere; }
   .result .sub { opacity:.85; font-size:15px; margin-top:6px; }
   .breakdown { display:flex; justify-content:space-around; gap:12px; margin-top:18px; flex-wrap:wrap; }
   .breakdown div { font-size:14px; }
-  .breakdown .b { font-family:ui-monospace,Consolas,monospace; font-size:20px; display:block; }
+  .breakdown .b { font-family:ui-monospace,Consolas,monospace; font-size:20px; display:block; overflow-wrap:anywhere; }
   .faq { padding:8px 0 48px; }
   .faq h2 { font-size:22px; margin-bottom:14px; }
   .faq h3 { font-size:16px; margin-top:16px; }
@@ -45,23 +45,23 @@
   </header>
 
   <div class="panel">
-    <label>Target take-home income per year <span class="hint">(what you want to earn)</span></label>
+    <label for="income">Target take-home income per year <span class="hint">(what you want to earn)</span></label>
     <div class="ig"><span class="pre">$</span><input id="income" type="number" value="80000" min="0" oninput="calc()"></div>
 
-    <label>Billable hours per week <span class="hint">(actual client work — usually 50–70% of your week)</span></label>
+    <label for="hours">Billable hours per week <span class="hint">(actual client work — usually 50–70% of your week)</span></label>
     <input id="hours" type="number" value="25" min="1" oninput="calc()">
 
-    <label>Weeks worked per year <span class="hint">(52 minus vacation, holidays, sick days)</span></label>
+    <label for="weeks">Weeks worked per year <span class="hint">(52 minus vacation, holidays, sick days)</span></label>
     <input id="weeks" type="number" value="46" min="1" max="52" oninput="calc()">
 
-    <label>Annual business expenses <span class="hint">(software, hardware, insurance, fees)</span></label>
+    <label for="expenses">Annual business expenses <span class="hint">(software, hardware, insurance, fees)</span></label>
     <div class="ig"><span class="pre">$</span><input id="expenses" type="number" value="6000" min="0" oninput="calc()"></div>
 
-    <label>Profit margin / buffer <span class="hint">(for taxes, slow months, growth)</span></label>
+    <label for="margin">Profit margin / buffer <span class="hint">(for taxes, slow months, growth)</span></label>
     <div class="ig"><input id="margin" type="number" value="25" min="0" oninput="calc()" style="padding-left:11px;"><span class="post">%</span></div>
   </div>
 
-  <div class="result">
+  <div class="result" aria-live="polite" role="status">
     <div class="num" id="rate">$0</div>
     <div class="sub">recommended hourly rate</div>
     <div class="breakdown">
@@ -87,19 +87,19 @@
 </div>
 
 <script>
+  // Clamp inputs to non-negative and guard every displayed value against
+  // Infinity/NaN (large finite inputs can overflow to Infinity during the math).
+  function num(id){ return Math.max(0, +document.getElementById(id).value || 0); }
+  function fmt(n){ return Number.isFinite(n) ? Math.round(n).toLocaleString() : '0'; }
   function calc(){
-    const income=+document.getElementById('income').value||0;
-    const hours=+document.getElementById('hours').value||0;
-    const weeks=+document.getElementById('weeks').value||0;
-    const expenses=+document.getElementById('expenses').value||0;
-    const margin=+document.getElementById('margin').value||0;
+    const income=num('income'), hours=num('hours'), weeks=num('weeks'), expenses=num('expenses'), margin=num('margin');
     const billable=hours*weeks;
     const gross=(income+expenses)*(1+margin/100);
     const rate=billable>0?gross/billable:0;
-    document.getElementById('rate').textContent='$'+Math.round(rate).toLocaleString();
-    document.getElementById('day').textContent='$'+Math.round(rate*8).toLocaleString();
-    document.getElementById('billable').textContent=billable.toLocaleString();
-    document.getElementById('gross').textContent='$'+Math.round(gross).toLocaleString();
+    document.getElementById('rate').textContent='$'+fmt(rate);
+    document.getElementById('day').textContent='$'+fmt(rate*8);
+    document.getElementById('billable').textContent=fmt(billable);
+    document.getElementById('gross').textContent='$'+fmt(gross);
   }
   calc();
 </script>

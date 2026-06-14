@@ -19,6 +19,7 @@
   label { display:block; font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:10px 0 4px; }
   input, textarea { width:100%; font-family:inherit; font-size:15px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fff; }
   textarea { min-height:64px; resize:vertical; }
+  .tablewrap { overflow-x:auto; }
   table { width:100%; border-collapse:collapse; margin-top:8px; }
   th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); padding:8px 8px; border-bottom:2px solid var(--line); }
   td { padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
@@ -61,35 +62,37 @@
   <div class="panel">
     <div class="grid2">
       <div>
-        <label>From (your business)</label>
+        <label for="from">From (your business)</label>
         <textarea id="from" placeholder="Your Name / Business&#10;email@example.com&#10;Address"></textarea>
-        <label>Bill to (client)</label>
+        <label for="to">Bill to (client)</label>
         <textarea id="to" placeholder="Client Name&#10;email@example.com&#10;Address"></textarea>
       </div>
       <div>
-        <label>Invoice #</label>
+        <label for="invno">Invoice #</label>
         <input id="invno" placeholder="INV-001">
-        <label>Date</label>
+        <label for="date">Date</label>
         <input id="date" type="date">
-        <label>Due date</label>
+        <label for="due">Due date</label>
         <input id="due" type="date">
       </div>
     </div>
 
-    <label style="margin-top:18px;">Line items</label>
-    <table>
-      <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Unit price</th><th>Amount</th><th class="noprint"></th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table>
+    <label id="itemslabel" style="margin-top:18px;">Line items</label>
+    <div class="tablewrap">
+      <table aria-labelledby="itemslabel">
+        <thead><tr><th style="width:50%">Description</th><th>Qty</th><th>Unit price</th><th>Amount</th><th class="noprint"></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
     <button class="btn ghost noprint" style="margin-top:10px;" onclick="addRow()">+ Add line</button>
 
     <div class="totals">
       <div class="totline"><span>Subtotal</span><span class="amt" id="subtotal">$0.00</span></div>
-      <div class="totline taxrow"><span>Tax</span><input id="tax" type="number" value="0" min="0" step="0.1" oninput="calc()"><span>%</span><span class="amt" id="taxamt">$0.00</span></div>
+      <div class="totline taxrow"><span>Tax</span><input id="tax" type="number" value="0" min="0" step="0.1" aria-label="Tax percent" oninput="calc()"><span>%</span><span class="amt" id="taxamt">$0.00</span></div>
       <div class="totline grand"><span>Total</span><span class="amt" id="total">$0.00</span></div>
     </div>
 
-    <label style="margin-top:18px;">Notes / payment terms</label>
+    <label for="notes" style="margin-top:18px;">Notes / payment terms</label>
     <textarea id="notes" placeholder="Thank you! Payment due within 14 days via..."></textarea>
 
     <div class="actions noprint">
@@ -117,23 +120,24 @@
 
 <script>
   function fmt(n){ return '$' + (isFinite(n)?n:0).toFixed(2); }
+  function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function addRow(desc='',qty=1,price=0){
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><input class="d" value="${desc}" placeholder="Item or service"></td>
-      <td><input class="q amt" type="number" value="${qty}" min="0" step="1" style="width:64px" oninput="calc()"></td>
-      <td><input class="p amt" type="number" value="${price}" min="0" step="0.01" style="width:90px" oninput="calc()"></td>
+    tr.innerHTML=`<td><input class="d" value="${esc(desc)}" placeholder="Item or service" aria-label="Description"></td>
+      <td><input class="q amt" type="number" value="${qty}" min="0" step="1" style="width:64px" aria-label="Quantity" oninput="calc()"></td>
+      <td><input class="p amt" type="number" value="${price}" min="0" step="0.01" style="width:90px" aria-label="Unit price" oninput="calc()"></td>
       <td class="amt rowamt">$0.00</td>
-      <td class="noprint"><button class="delrow" title="Remove" onclick="this.closest('tr').remove();calc()">&times;</button></td>`;
+      <td class="noprint"><button class="delrow" title="Remove" aria-label="Remove line" onclick="this.closest('tr').remove();calc()">&times;</button></td>`;
     document.getElementById('rows').appendChild(tr); calc();
   }
   function calc(){
     let sub=0;
     document.querySelectorAll('#rows tr').forEach(tr=>{
-      const q=parseFloat(tr.querySelector('.q').value)||0;
-      const p=parseFloat(tr.querySelector('.p').value)||0;
+      const q=Math.max(0, parseFloat(tr.querySelector('.q').value)||0);
+      const p=Math.max(0, parseFloat(tr.querySelector('.p').value)||0);
       const a=q*p; sub+=a; tr.querySelector('.rowamt').textContent=fmt(a);
     });
-    const taxpct=parseFloat(document.getElementById('tax').value)||0;
+    const taxpct=Math.max(0, parseFloat(document.getElementById('tax').value)||0);
     const taxamt=sub*taxpct/100;
     document.getElementById('subtotal').textContent=fmt(sub);
     document.getElementById('taxamt').textContent=fmt(taxamt);

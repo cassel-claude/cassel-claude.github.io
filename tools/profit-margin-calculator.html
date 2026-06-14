@@ -27,7 +27,9 @@
   .result { background:var(--accent); color:#fff; border-radius:12px; padding:22px; margin:24px 0; }
   .result .grid { display:flex; justify-content:space-around; gap:12px; flex-wrap:wrap; text-align:center; }
   .result .lbl { font-size:13px; opacity:.85; text-transform:uppercase; letter-spacing:.5px; }
-  .result .b { font-family:ui-monospace,Consolas,monospace; font-size:30px; font-weight:bold; display:block; }
+  .result .b { font-family:ui-monospace,Consolas,monospace; font-size:30px; font-weight:bold; display:block; overflow-wrap:anywhere; }
+  .result .msg { width:100%; text-align:center; font-size:19px; }
+  @media (max-width:420px){ .result .grid{ flex-direction:column; gap:16px; } .result .b{ font-size:24px; } }
   .faq { padding:8px 0 48px; }
   .faq h2 { font-size:22px; margin-bottom:14px; }
   .faq h3 { font-size:16px; margin-top:16px; }
@@ -50,26 +52,26 @@
   </div>
   <div class="panel">
     <div id="forward">
-      <label>Cost (what it costs you)</label>
+      <label for="cost1">Cost (what it costs you)</label>
       <div class="ig"><span class="pre">$</span><input id="cost1" type="number" value="40" min="0" oninput="calc()"></div>
-      <label>Price (what you charge)</label>
+      <label for="price1">Price (what you charge)</label>
       <div class="ig"><span class="pre">$</span><input id="price1" type="number" value="100" min="0" oninput="calc()"></div>
     </div>
     <div id="reverse" style="display:none;">
-      <label>Cost (what it costs you)</label>
+      <label for="cost2">Cost (what it costs you)</label>
       <div class="ig"><span class="pre">$</span><input id="cost2" type="number" value="40" min="0" oninput="calc()"></div>
-      <label>Target profit margin</label>
+      <label for="tmargin">Target profit margin</label>
       <div class="ig"><input class="pct" id="tmargin" type="number" value="60" min="0" max="99.9" oninput="calc()"><span class="post">%</span></div>
     </div>
   </div>
 
-  <div class="result">
+  <div class="result" aria-live="polite" role="status">
     <div class="grid" id="out"></div>
   </div>
 
   <section class="faq">
     <h2>Margin vs. markup — what's the difference?</h2>
-    <p><strong>Profit margin</strong> is profit as a percentage of the <em>price</em>: (price − cost) ÷ price. <strong>Markup</strong> is profit as a percentage of the <em>cost</em>: (price − cost) ÷ cost. A 50% margin is an 100% markup — they describe the same dollar of profit from two different angles, which is why they're so easy to confuse.</p>
+    <p><strong>Profit margin</strong> is profit as a percentage of the <em>price</em>: (price − cost) ÷ price. <strong>Markup</strong> is profit as a percentage of the <em>cost</em>: (price − cost) ÷ cost. A 50% margin is a 100% markup — they describe the same dollar of profit from two different angles, which is why they're so easy to confuse.</p>
     <h3>Which should I use to set prices?</h3>
     <p>Use margin when you're thinking about how much of each sale you keep, and markup when you're pricing up from a known cost. The "target margin → price" tab does the markup math for you.</p>
     <h3>Is anything stored?</h3>
@@ -91,18 +93,19 @@
     document.getElementById('tabB').classList.toggle('active',m==='reverse');
     calc();
   }
+  function num(id){ return Math.max(0, +document.getElementById(id).value || 0); }
   function cell(lbl,val){ return `<div><span class="lbl">${lbl}</span><span class="b">${val}</span></div>`; }
   function money(n){ return '$'+(isFinite(n)?n:0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function pct(n){ return (isFinite(n)?n:0).toFixed(1)+'%'; }
   function calc(){
     let cost,price;
     if(mode==='forward'){
-      cost=+document.getElementById('cost1').value||0;
-      price=+document.getElementById('price1').value||0;
+      cost=num('cost1'); price=num('price1');
     } else {
-      cost=+document.getElementById('cost2').value||0;
-      const tm=+document.getElementById('tmargin').value||0;
-      price=tm<100?cost/(1-tm/100):0;
+      cost=num('cost2');
+      const tm=num('tmargin');
+      if(tm>=100){ document.getElementById('out').innerHTML='<div class="msg">Margin must be under 100% — at 100% the price would be infinite.</div>'; return; }
+      price=cost/(1-tm/100);
     }
     const profit=price-cost;
     const margin=price>0?profit/price*100:0;
