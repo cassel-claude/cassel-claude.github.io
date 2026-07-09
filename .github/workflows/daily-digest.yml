@@ -1,0 +1,41 @@
+name: Daily market digest
+
+# Emails a market summary for the symbols in digest-config.json.
+# Setup (all three secrets required, see "Daily email digest" in README.md):
+#   TWELVEDATA_API_KEY - free key from twelvedata.com
+#   MAIL_USERNAME      - Gmail address to send from
+#   MAIL_PASSWORD      - Gmail app password (not your normal password)
+#   MAIL_TO            - recipient address (optional; defaults to MAIL_USERNAME)
+
+on:
+  schedule:
+    - cron: "15 21 * * 1-5" # weekdays, shortly after US market close (~4pm ET)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build digest
+        id: build
+        env:
+          TWELVEDATA_API_KEY: ${{ secrets.TWELVEDATA_API_KEY }}
+        run: node scripts/daily-digest.mjs
+
+      - name: Send email
+        if: steps.build.outputs.send == 'true'
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Stock Digest <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO != '' && secrets.MAIL_TO || secrets.MAIL_USERNAME }}
+          subject: ${{ steps.build.outputs.subject }}
+          html_body: file://digest.html

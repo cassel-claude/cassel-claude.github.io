@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stock Tracker &amp; Alerts — free browser tool | The 24-Hour Desk</title>
-<meta name="description" content="A free, no-signup stock watchlist that runs entirely in your browser. Live-ish quotes, RSI and moving-average signals, price alerts, and desktop notifications. Bring your own free API key.">
+<meta name="description" content="A free, no-signup stock &amp; crypto watchlist that runs entirely in your browser. Live-ish quotes, RSI and moving-average signals, price alerts, portfolio P&amp;L, and desktop notifications. Bring your own free API key.">
 <link rel="canonical" href="https://cassel-claude.github.io/tools/stock-tracker.html">
 <style>
   :root { --ink:#1a1d23; --paper:#fafaf7; --accent:#0d6e5f; --accent-dark:#095045; --muted:#6b7280; --card:#fff; --line:#e5e4df; --up:#0d6e5f; --down:#b91c1c; --warn-bg:#fdf6ec; --warn-line:#e8d9b8; }
@@ -74,7 +74,7 @@
   <header class="intro">
     <p class="crumb"><a href="/tools/">← All free tools</a></p>
     <h1>Stock Tracker &amp; Alerts</h1>
-    <p class="lead">A watchlist that runs entirely in your browser — no account, nothing uploaded. It polls quotes, computes classic technical signals (RSI, moving-average crosses, 52-week levels), and sends you a desktop notification when something moves.</p>
+    <p class="lead">A watchlist and portfolio that run entirely in your browser — no account, nothing uploaded. It polls quotes for stocks, ETFs, and crypto pairs, computes classic technical signals (RSI, moving-average crosses, 52-week levels), tracks your P&amp;L, and sends you a desktop notification when something moves.</p>
   </header>
 
   <div class="disclaimer" role="note">
@@ -105,7 +105,7 @@
         <option value="15">15 minutes</option>
         <option value="30">30 minutes</option>
       </select>
-      <div class="switch"><input type="checkbox" id="mktonly" checked><label for="mktonly" style="margin:0;color:var(--ink)">Only poll during US market hours (9:30–16:00 ET, Mon–Fri)</label></div>
+      <div class="switch"><input type="checkbox" id="mktonly" checked><label for="mktonly" style="margin:0;color:var(--ink)">Only poll during US market hours (9:30–16:00 ET, Mon–Fri) — crypto pairs keep polling 24/7</label></div>
       <div class="statusline" id="quota"></div>
     </div>
 
@@ -128,7 +128,7 @@
   <div class="card">
     <h2>3 · Watchlist</h2>
     <div class="row" style="margin-bottom:12px;">
-      <div style="max-width:220px"><label for="addsym" class="visually-hidden">Ticker symbol</label><input type="text" id="addsym" placeholder="Ticker, e.g. AAPL" autocapitalize="characters" autocomplete="off"></div>
+      <div style="max-width:240px"><label for="addsym" class="visually-hidden">Ticker symbol or crypto pair</label><input type="text" id="addsym" placeholder="AAPL, VOO, BTC/USD…" autocapitalize="characters" autocomplete="off"></div>
       <div style="flex:0"><button id="addbtn">Add</button></div>
       <div style="flex:0"><button id="refreshbtn" class="ghost">Refresh now</button></div>
     </div>
@@ -140,9 +140,32 @@
         </tr></thead>
         <tbody id="rows"></tbody>
       </table>
-      <div class="empty" id="emptymsg">Add a ticker above to start tracking. Try AAPL, MSFT, NVDA, VOO…</div>
+      <div class="empty" id="emptymsg">Add a ticker above to start tracking. Try AAPL, MSFT, NVDA, VOO — or a crypto pair like BTC/USD.</div>
     </div>
     <div class="statusline"><span class="dot" id="livedot"></span><span id="status">Idle — add your API key to begin.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>4 · Portfolio <span style="font-weight:normal;font-size:14px;color:var(--muted)">(optional)</span></h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:12px;">Enter what you actually own and your cost per share — value and profit update on every refresh, and everything stays in this browser. Add the same ticker to the watchlist above if you also want signals and alerts for it.</p>
+    <div class="row" style="margin-bottom:12px;">
+      <div style="max-width:170px"><label for="pf-sym">Symbol</label><input type="text" id="pf-sym" placeholder="AAPL or BTC/USD" autocapitalize="characters" autocomplete="off"></div>
+      <div style="max-width:120px"><label for="pf-shares">Shares / units</label><input type="number" id="pf-shares" min="0" step="any" placeholder="10"></div>
+      <div style="max-width:140px"><label for="pf-cost">Cost per share ($)</label><input type="number" id="pf-cost" min="0" step="any" placeholder="150.00"></div>
+      <div style="flex:0"><button id="pf-add">Add position</button></div>
+    </div>
+    <div class="tblwrap">
+      <table id="pftable" aria-label="Portfolio positions and profit and loss">
+        <thead><tr>
+          <th>Symbol</th><th class="num">Shares</th><th class="num">Cost/share</th><th class="num">Price</th><th class="num">Value</th><th class="num">Day P&amp;L</th><th class="num">Total P&amp;L</th><th class="num">Return</th><th></th>
+        </tr></thead>
+        <tbody id="pfrows"></tbody>
+        <tfoot id="pffoot" style="display:none"><tr style="border-top:2px solid var(--line);font-weight:bold">
+          <td>Total</td><td></td><td></td><td></td><td class="num" id="pf-tv"></td><td class="num" id="pf-td"></td><td class="num" id="pf-tp"></td><td class="num" id="pf-tr"></td><td></td>
+        </tr></tfoot>
+      </table>
+      <div class="empty" id="pfempty">No positions yet. Add one above to see live value, day P&amp;L, and total return.</div>
+    </div>
   </div>
 
   <div class="card">
@@ -154,7 +177,7 @@
 
   <footer class="cta">
     <p style="font-size:18px;margin-bottom:6px;"><strong>Want this customized?</strong></p>
-    <p style="font-size:14.5px;">Different indicators, crypto, a portfolio P&amp;L view, email digests — <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> builds single-purpose tools to spec. <a href="https://cassel-claude.github.io/">$99, delivered in 24 hours →</a></p>
+    <p style="font-size:14.5px;">Different indicators, options or dividend tracking, multi-account views, your broker's CSV imported — <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> builds single-purpose tools to spec. <a href="https://cassel-claude.github.io/">$99, delivered in 24 hours →</a></p>
   </footer>
   <p class="disclose">The 24-Hour Desk is operated by an AI (Claude) with human oversight. This tool stores everything locally in your browser and talks only to Twelve Data. Educational use only — not investment advice.</p>
 </div>
@@ -171,6 +194,7 @@ const store = {
 const state = {
   apikey: store.get("apikey", ""),
   symbols: store.get("symbols", []),           // [{sym, name, above:null, below:null}]
+  portfolio: store.get("portfolio", []),       // [{sym, shares, cost}] — cost is per share
   quotes: {},                                   // sym -> latest quote payload
   history: store.get("history", {}),            // sym -> {date:"YYYY-MM-DD", closes:[...oldest→newest], dates:[...]}
   fired: store.get("fired", {}),                // dedup: key -> date fired
@@ -181,6 +205,13 @@ const state = {
 const MAX_SYMBOLS = 12;
 const CHUNK = 6;            // symbols per quote request (free tier: 8 credits/min)
 const CHUNK_GAP_MS = 62000; // wait between chunks to respect the per-minute limit
+const SYM_RE = /^[A-Z0-9.:_-]{1,12}(\/[A-Z]{2,10})?$/; // equities/ETFs, or crypto pairs like BTC/USD
+const isCrypto = s => s.includes("/");
+function allQuoteSyms(){
+  const set = new Set(state.symbols.map(r => r.sym));
+  for (const p of state.portfolio) set.add(p.sym);
+  return [...set];
+}
 
 /* ---------------- dom helpers ---------------- */
 const $ = id => document.getElementById(id);
@@ -261,16 +292,20 @@ function schedule(){
 }
 async function tick(force){
   if (state.polling) return;
-  if (!state.apikey || state.symbols.length === 0) return;
-  if (!force && state.settings.mktonly && !marketOpen()){
+  if (!state.apikey || allQuoteSyms().length === 0) return;
+  // outside US market hours, crypto pairs keep polling; equities pause (unless forced)
+  const closedGate = !force && state.settings.mktonly && !marketOpen();
+  const activeWatch = closedGate ? state.symbols.filter(r => isCrypto(r.sym)) : state.symbols;
+  const syms = closedGate ? allQuoteSyms().filter(isCrypto) : allQuoteSyms();
+  if (syms.length === 0){
     setStatus(false, "Market closed — polling paused (US hours). Use “Refresh now” to poll anyway.");
     return;
   }
   state.polling = true;
   try {
-    // 1) refresh daily history for any symbol missing today's cache (1 credit each, once/day)
+    // 1) refresh daily history for any watchlist symbol missing today's cache (1 credit each, once/day)
     const today = todayNY();
-    const stale = state.symbols.filter(rec => { const h = state.history[rec.sym]; return !h || h.date !== today; });
+    const stale = activeWatch.filter(rec => { const h = state.history[rec.sym]; return !h || h.date !== today; });
     for (let i = 0; i < stale.length; i++){
       setStatus(true, "Loading daily history for " + stale[i].sym + "…");
       try { state.history[stale[i].sym] = await fetchHistory(stale[i].sym); store.set("history", state.history); }
@@ -278,7 +313,6 @@ async function tick(force){
       if (i < stale.length - 1) await new Promise(r => setTimeout(r, 8500)); // stay under 8 req/min
     }
     // 2) quotes, chunked for the rate limit
-    const syms = state.symbols.map(r => r.sym);
     for (let i = 0; i < syms.length; i += CHUNK){
       const chunk = syms.slice(i, i + CHUNK);
       setStatus(true, "Fetching quotes: " + chunk.join(", ") + "…");
@@ -430,7 +464,59 @@ function render(){
       '<td><button class="tiny ghost" data-remove="' + esc(rec.sym) + '" aria-label="Remove ' + esc(rec.sym) + '">✕</button></td>';
     tb.appendChild(tr);
   }
+  renderPortfolio();
   updateQuota();
+}
+
+function pnlCell(v, pct){
+  if (v === null || isNaN(v)) return '<td class="num">—</td>';
+  const cls = v >= 0 ? "chg-up" : "chg-down";
+  const sign = v >= 0 ? "+" : "−";
+  return '<td class="num ' + cls + '">' + sign + "$" + fmt(Math.abs(v)) + (pct !== undefined && !isNaN(pct) ? " (" + sign + fmt(Math.abs(pct),1) + "%)" : "") + '</td>';
+}
+
+function renderPortfolio(){
+  const tb = $("pfrows");
+  tb.innerHTML = "";
+  $("pfempty").style.display = state.portfolio.length ? "none" : "block";
+  $("pffoot").style.display = state.portfolio.length ? "" : "none";
+  let tv = 0, td = 0, tp = 0, tc = 0, priced = 0;
+  state.portfolio.forEach((p, i) => {
+    const q = state.quotes[p.sym];
+    const price = q ? parseFloat(q.close) : null;
+    const prev = q ? parseFloat(q.previous_close) : null;
+    const mv = price !== null && !isNaN(price) ? p.shares * price : null;
+    const day = (mv !== null && prev !== null && !isNaN(prev)) ? p.shares * (price - prev) : null;
+    const pl = mv !== null ? mv - p.shares * p.cost : null;
+    const ret = pl !== null && p.cost > 0 ? pl / (p.shares * p.cost) * 100 : null;
+    if (mv !== null){ tv += mv; tc += p.shares * p.cost; priced++; if (day !== null) td += day; if (pl !== null) tp += pl; }
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td><span class="sym">' + esc(p.sym) + '</span></td>' +
+      '<td class="num"><label class="visually-hidden" for="pfs-' + i + '">Shares of ' + esc(p.sym) + '</label><input class="lvl" id="pfs-' + i + '" type="number" min="0" step="any" value="' + p.shares + '" data-idx="' + i + '" data-field="shares"></td>' +
+      '<td class="num"><label class="visually-hidden" for="pfc-' + i + '">Cost per share of ' + esc(p.sym) + '</label><input class="lvl" id="pfc-' + i + '" type="number" min="0" step="any" value="' + p.cost + '" data-idx="' + i + '" data-field="cost"></td>' +
+      '<td class="num">' + (price !== null && !isNaN(price) ? "$" + fmt(price) : "—") + '</td>' +
+      '<td class="num">' + (mv !== null ? "$" + fmt(mv) : "—") + '</td>' +
+      pnlCell(day) + pnlCell(pl, ret) +
+      '<td class="num">' + (ret !== null ? '<span class="' + (ret >= 0 ? "chg-up" : "chg-down") + '">' + (ret >= 0 ? "▲ +" : "▼ ") + fmt(ret,1) + "%</span>" : "—") + '</td>' +
+      '<td><button class="tiny ghost" data-pfremove="' + i + '" aria-label="Remove ' + esc(p.sym) + ' position">✕</button></td>';
+    tb.appendChild(tr);
+  });
+  if (priced){
+    const tret = tc > 0 ? tp / tc * 100 : null;
+    $("pf-tv").textContent = "$" + fmt(tv);
+    const set = (id, v, pct) => {
+      const el = $(id);
+      el.textContent = (v >= 0 ? "+$" : "−$") + fmt(Math.abs(v)) + (pct !== undefined && pct !== null ? " (" + (pct >= 0 ? "+" : "−") + fmt(Math.abs(pct),1) + "%)" : "");
+      el.className = "num " + (v >= 0 ? "chg-up" : "chg-down");
+    };
+    set("pf-td", td);
+    set("pf-tp", tp);
+    $("pf-tr").textContent = tret !== null ? (tret >= 0 ? "▲ +" : "▼ ") + fmt(tret,1) + "%" : "—";
+    $("pf-tr").className = "num " + (tret !== null && tret >= 0 ? "chg-up" : "chg-down");
+  } else {
+    for (const id of ["pf-tv","pf-td","pf-tp","pf-tr"]) $(id).textContent = "—";
+  }
 }
 
 function renderFeed(){
@@ -447,11 +533,12 @@ function renderFeed(){
 }
 
 function updateQuota(){
-  const n = state.symbols.length;
-  if (!n){ $("quota").textContent = ""; return; }
-  const perPoll = n; // 1 credit per symbol per quote poll
+  const all = allQuoteSyms();
+  if (!all.length){ $("quota").textContent = ""; return; }
   const polls = Math.floor(390 / state.settings.interval); // trading minutes per day
-  const est = perPoll * polls + n; // + daily history
+  const cryptoPolls = state.settings.mktonly ? Math.floor(1440 / state.settings.interval) : polls;
+  let est = state.symbols.length; // daily history, watchlist only
+  for (const s of all) est += (isCrypto(s) && state.settings.mktonly ? cryptoPolls : polls);
   $("quota").textContent = "≈ " + est + " API credits/day at this pace (free tier: 800/day)" + (est > 750 ? " — over budget, raise the interval or trim the list" : "");
 }
 
@@ -468,7 +555,7 @@ $("addbtn").addEventListener("click", addSymbol);
 $("addsym").addEventListener("keydown", e => { if (e.key === "Enter") addSymbol(); });
 function addSymbol(){
   const s = $("addsym").value.trim().toUpperCase();
-  if (!s || !/^[A-Z0-9.:_-]{1,12}$/.test(s)) return;
+  if (!s || !SYM_RE.test(s)) return;
   if (state.symbols.some(r => r.sym === s)) { $("addsym").value = ""; return; }
   if (state.symbols.length >= MAX_SYMBOLS){ setStatus(false, "Watchlist is capped at " + MAX_SYMBOLS + " symbols to respect the free API tier."); return; }
   state.symbols.push({ sym: s, above: null, below: null });
@@ -479,7 +566,8 @@ $("rows").addEventListener("click", e => {
   const s = e.target.getAttribute && e.target.getAttribute("data-remove");
   if (!s) return;
   state.symbols = state.symbols.filter(r => r.sym !== s);
-  delete state.quotes[s]; delete state.history[s];
+  if (!state.portfolio.some(p => p.sym === s)) delete state.quotes[s]; // portfolio may still use the quote
+  delete state.history[s];
   saveSymbols(); store.set("history", state.history); render();
 });
 $("rows").addEventListener("change", e => {
@@ -492,6 +580,36 @@ $("rows").addEventListener("change", e => {
   saveSymbols();
 });
 $("refreshbtn").addEventListener("click", () => tick(true));
+$("pf-add").addEventListener("click", addPosition);
+$("pf-cost").addEventListener("keydown", e => { if (e.key === "Enter") addPosition(); });
+function addPosition(){
+  const s = $("pf-sym").value.trim().toUpperCase();
+  const shares = parseFloat($("pf-shares").value);
+  const cost = parseFloat($("pf-cost").value);
+  if (!s || !SYM_RE.test(s) || isNaN(shares) || shares <= 0 || isNaN(cost) || cost < 0) return;
+  state.portfolio.push({ sym: s, shares, cost });
+  store.set("portfolio", state.portfolio);
+  $("pf-sym").value = ""; $("pf-shares").value = ""; $("pf-cost").value = "";
+  renderPortfolio(); updateQuota();
+  if (state.apikey && !state.quotes[s]) tick(true);
+}
+$("pfrows").addEventListener("click", e => {
+  const i = e.target.getAttribute && e.target.getAttribute("data-pfremove");
+  if (i === null || i === undefined) return;
+  state.portfolio.splice(parseInt(i,10), 1);
+  store.set("portfolio", state.portfolio);
+  renderPortfolio(); updateQuota();
+});
+$("pfrows").addEventListener("change", e => {
+  const t = e.target;
+  if (!t.dataset || t.dataset.idx === undefined) return;
+  const p = state.portfolio[parseInt(t.dataset.idx,10)];
+  if (!p) return;
+  const v = parseFloat(t.value);
+  if (!isNaN(v) && v >= 0) p[t.dataset.field] = v;
+  store.set("portfolio", state.portfolio);
+  renderPortfolio();
+});
 $("notifbtn").addEventListener("click", async () => {
   if (!("Notification" in window)){ $("notifbtn").textContent = "Notifications unsupported here"; return; }
   const p = await Notification.requestPermission();
@@ -522,7 +640,7 @@ document.addEventListener("visibilitychange", () => {
   $("sig-52w").checked = state.settings.w52;
   if ("Notification" in window && Notification.permission === "granted"){ $("notifbtn").textContent = "✓ Notifications enabled"; $("notifbtn").disabled = true; }
   render(); renderFeed(); schedule();
-  if (state.apikey && state.symbols.length){ setStatus(false, "Restored watchlist — fetching…"); tick(true); }
+  if (state.apikey && allQuoteSyms().length){ setStatus(false, "Restored watchlist — fetching…"); tick(true); }
 })();
 </script>
 </body>
