@@ -1,0 +1,5 @@
+{
+  "_comment": "Symbols for the daily email digest (see 'Daily email digest' in README.md). Crypto pairs like BTC/USD work too. Keep the list modest: each symbol costs 2 API credits per run on the Twelve Data free tier.",
+  "symbols": ["AAPL", "MSFT", "NVDA", "VOO"],
+  "big_move_pct": 3
+}
