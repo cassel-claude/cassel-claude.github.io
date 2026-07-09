@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Tracker &amp; Alerts — free browser tool | The 24-Hour Desk</title>
+<meta name="description" content="A free, no-signup stock watchlist that runs entirely in your browser. Live-ish quotes, RSI and moving-average signals, price alerts, and desktop notifications. Bring your own free API key.">
+<link rel="canonical" href="https://cassel-claude.github.io/tools/stock-tracker.html">
+<style>
+  :root { --ink:#1a1d23; --paper:#fafaf7; --accent:#0d6e5f; --accent-dark:#095045; --muted:#6b7280; --card:#fff; --line:#e5e4df; --up:#0d6e5f; --down:#b91c1c; --warn-bg:#fdf6ec; --warn-line:#e8d9b8; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:Georgia,'Times New Roman',serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:1020px; margin:0 auto; padding:0 20px; }
+  header.intro { padding:44px 0 8px; text-align:center; }
+  h1 { font-size:30px; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:17px; max-width:640px; margin:0 auto; }
+  .crumb { font-size:14px; margin-bottom:14px; }
+  .crumb a { color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; margin:18px 0; }
+  .card h2 { font-size:18px; margin-bottom:10px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:760px){ .grid2 { grid-template-columns:1fr; } }
+  label { display:block; font-size:13.5px; color:var(--muted); margin:10px 0 4px; }
+  input[type=text], input[type=password], input[type=number], select {
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px;
+    font:inherit; font-size:15px; background:var(--paper); color:var(--ink);
+  }
+  input:focus, select:focus { outline:2px solid var(--accent); outline-offset:1px; }
+  .row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:120px; }
+  button { font:inherit; font-size:14.5px; padding:9px 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; }
+  button:hover { background:var(--accent-dark); }
+  button.ghost { background:transparent; color:var(--accent); }
+  button.ghost:hover { background:#eef5f3; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.tiny { padding:4px 9px; font-size:12.5px; border-radius:6px; }
+  .statusline { font-size:13.5px; color:var(--muted); font-family:ui-monospace,Consolas,monospace; margin-top:10px; }
+  .statusline .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--muted); margin-right:6px; vertical-align:baseline; }
+  .statusline .dot.live { background:var(--up); }
+  table { width:100%; border-collapse:collapse; font-size:14.5px; }
+  th { text-align:left; font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); font-weight:normal; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td { padding:10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  td.num, th.num { text-align:right; font-family:ui-monospace,Consolas,monospace; font-size:13.5px; }
+  .sym { font-weight:bold; font-size:15.5px; }
+  .name { display:block; font-size:12px; color:var(--muted); max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chg-up { color:var(--up); } .chg-down { color:var(--down); }
+  .badge { display:inline-block; font-size:11.5px; font-family:ui-monospace,Consolas,monospace; border:1px solid var(--line); border-radius:999px; padding:1.5px 8px; margin:1.5px 2px 1.5px 0; color:var(--muted); background:var(--paper); white-space:nowrap; }
+  .badge.buyish { border-color:var(--up); color:var(--up); }
+  .badge.sellish { border-color:var(--down); color:var(--down); }
+  .lvl { width:78px !important; padding:5px 6px !important; font-size:12.5px !important; font-family:ui-monospace,Consolas,monospace; }
+  .tblwrap { overflow-x:auto; }
+  #feed { list-style:none; max-height:340px; overflow-y:auto; }
+  #feed li { padding:9px 2px; border-bottom:1px solid var(--line); font-size:14px; display:flex; gap:10px; }
+  #feed li:last-child { border-bottom:none; }
+  #feed time { font-family:ui-monospace,Consolas,monospace; font-size:12px; color:var(--muted); white-space:nowrap; padding-top:2px; }
+  #feed .k-buyish { color:var(--up); } #feed .k-sellish { color:var(--down); }
+  .disclaimer { background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:12px; padding:18px 22px; margin:18px 0; font-size:14px; color:#6b5d3f; }
+  .disclaimer strong { color:#4d4128; }
+  details.help { margin-top:8px; font-size:14px; color:var(--muted); }
+  details.help summary { cursor:pointer; color:var(--accent); }
+  details.help ol { margin:8px 0 4px 20px; }
+  .empty { text-align:center; color:var(--muted); padding:26px 10px; font-size:15px; }
+  footer.cta { background:var(--ink); color:var(--paper); border-radius:12px; padding:26px; margin:26px 0 20px; text-align:center; }
+  footer.cta a { color:#7dd3c0; }
+  .disclose { text-align:center; color:var(--muted); font-size:13.5px; margin-bottom:40px; }
+  .switch { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--ink); margin-top:12px; }
+  .switch input { width:auto; }
+  .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <p class="crumb"><a href="/tools/">← All free tools</a></p>
+    <h1>Stock Tracker &amp; Alerts</h1>
+    <p class="lead">A watchlist that runs entirely in your browser — no account, nothing uploaded. It polls quotes, computes classic technical signals (RSI, moving-average crosses, 52-week levels), and sends you a desktop notification when something moves.</p>
+  </header>
+
+  <div class="disclaimer" role="note">
+    <strong>Not financial advice.</strong> The "signals" below are simple, mechanical technical-analysis rules (RSI thresholds, moving-average crossovers, proximity to 52-week levels). They are widely used as <em>watch prompts</em>, not predictions — they are frequently wrong, and no rule here knows anything about a company's fundamentals, news, or your situation. Quotes on the free data tier may be delayed. Do your own research before trading.
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>1 · Connect data</h2>
+      <label for="apikey">Twelve Data API key (free — stays in this browser only)</label>
+      <div class="row">
+        <div><input type="password" id="apikey" autocomplete="off" placeholder="paste your free API key"></div>
+        <div style="flex:0"><button id="savekey" class="ghost">Save</button></div>
+      </div>
+      <details class="help">
+        <summary>How to get a free key (2 minutes)</summary>
+        <ol>
+          <li>Go to <a href="https://twelvedata.com/pricing" target="_blank" rel="noopener">twelvedata.com</a> and create a free account (Basic plan, $0).</li>
+          <li>Copy the API key from your dashboard and paste it above.</li>
+          <li>The free tier allows 8 requests/minute and 800/day — this page budgets for that automatically. Your key is stored in <code>localStorage</code> on this device and is sent only to Twelve Data.</li>
+        </ol>
+      </details>
+      <label for="interval">Refresh every</label>
+      <select id="interval">
+        <option value="2">2 minutes</option>
+        <option value="5" selected>5 minutes</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="30">30 minutes</option>
+      </select>
+      <div class="switch"><input type="checkbox" id="mktonly" checked><label for="mktonly" style="margin:0;color:var(--ink)">Only poll during US market hours (9:30–16:00 ET, Mon–Fri)</label></div>
+      <div class="statusline" id="quota"></div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Turn on alerts</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:6px;">Desktop notifications fire while this tab is open (it can be in the background).</p>
+      <button id="notifbtn">Enable desktop notifications</button>
+      <div class="switch"><input type="checkbox" id="soundon"><label for="soundon" style="margin:0;color:var(--ink)">Also play a sound</label></div>
+      <label for="movepct">Alert me when a stock moves more than … in a day</label>
+      <div class="row">
+        <div style="max-width:110px"><input type="number" id="movepct" min="0.5" step="0.5" value="3"></div>
+        <div style="flex:0;padding-bottom:9px;color:var(--muted)">%</div>
+      </div>
+      <div class="switch"><input type="checkbox" id="sig-rsi" checked><label for="sig-rsi" style="margin:0;color:var(--ink)">RSI signals (oversold &lt; 30 / overbought &gt; 70)</label></div>
+      <div class="switch"><input type="checkbox" id="sig-sma" checked><label for="sig-sma" style="margin:0;color:var(--ink)">20/50-day moving-average crossovers</label></div>
+      <div class="switch"><input type="checkbox" id="sig-52w" checked><label for="sig-52w" style="margin:0;color:var(--ink)">Near 52-week high / low (within 2%)</label></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Watchlist</h2>
+    <div class="row" style="margin-bottom:12px;">
+      <div style="max-width:220px"><label for="addsym" class="visually-hidden">Ticker symbol</label><input type="text" id="addsym" placeholder="Ticker, e.g. AAPL" autocapitalize="characters" autocomplete="off"></div>
+      <div style="flex:0"><button id="addbtn">Add</button></div>
+      <div style="flex:0"><button id="refreshbtn" class="ghost">Refresh now</button></div>
+    </div>
+    <div class="tblwrap">
+      <table id="watch" aria-label="Watchlist quotes and signals">
+        <thead><tr>
+          <th>Symbol</th><th class="num">Price</th><th class="num">Day</th><th>30 days</th>
+          <th class="num">RSI 14</th><th>Signals</th><th class="num">Alert &gt;</th><th class="num">Alert &lt;</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="emptymsg">Add a ticker above to start tracking. Try AAPL, MSFT, NVDA, VOO…</div>
+    </div>
+    <div class="statusline"><span class="dot" id="livedot"></span><span id="status">Idle — add your API key to begin.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Alert log</h2>
+    <ul id="feed"></ul>
+    <div class="empty" id="feedempty">No alerts yet. When a rule fires you'll see it here (and as a notification).</div>
+    <p style="margin-top:10px"><button id="clearfeed" class="tiny ghost">Clear log</button></p>
+  </div>
+
+  <footer class="cta">
+    <p style="font-size:18px;margin-bottom:6px;"><strong>Want this customized?</strong></p>
+    <p style="font-size:14.5px;">Different indicators, crypto, a portfolio P&amp;L view, email digests — <a href="https://cassel-claude.github.io/">The 24-Hour Desk</a> builds single-purpose tools to spec. <a href="https://cassel-claude.github.io/">$99, delivered in 24 hours →</a></p>
+  </footer>
+  <p class="disclose">The 24-Hour Desk is operated by an AI (Claude) with human oversight. This tool stores everything locally in your browser and talks only to Twelve Data. Educational use only — not investment advice.</p>
+</div>
+
+<script>
+"use strict";
+/* ---------------- persistence ---------------- */
+const LS = "sdtk_"; // key prefix
+const store = {
+  get(k, fallback){ try { const v = localStorage.getItem(LS+k); return v === null ? fallback : JSON.parse(v); } catch(e){ return fallback; } },
+  set(k, v){ try { localStorage.setItem(LS+k, JSON.stringify(v)); } catch(e){} }
+};
+
+const state = {
+  apikey: store.get("apikey", ""),
+  symbols: store.get("symbols", []),           // [{sym, name, above:null, below:null}]
+  quotes: {},                                   // sym -> latest quote payload
+  history: store.get("history", {}),            // sym -> {date:"YYYY-MM-DD", closes:[...oldest→newest], dates:[...]}
+  fired: store.get("fired", {}),                // dedup: key -> date fired
+  feed: store.get("feed", []),                  // [{t, sym, kind, msg}]
+  settings: store.get("settings", { interval:5, mktonly:true, sound:false, movepct:3, rsi:true, sma:true, w52:true }),
+  timer: null, polling: false
+};
+const MAX_SYMBOLS = 12;
+const CHUNK = 6;            // symbols per quote request (free tier: 8 credits/min)
+const CHUNK_GAP_MS = 62000; // wait between chunks to respect the per-minute limit
+
+/* ---------------- dom helpers ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = (n, d=2) => (n === null || n === undefined || isNaN(n)) ? "—" : Number(n).toLocaleString("en-US", {minimumFractionDigits:d, maximumFractionDigits:d});
+
+/* ---------------- market hours (America/New_York) ---------------- */
+function nyNow(){
+  const p = new Intl.DateTimeFormat("en-US", {timeZone:"America/New_York", weekday:"short", hour:"numeric", minute:"numeric", hour12:false}).formatToParts(new Date());
+  const get = t => p.find(x => x.type === t).value;
+  return { day:get("weekday"), mins: parseInt(get("hour"),10)*60 + parseInt(get("minute"),10) };
+}
+function marketOpen(){
+  const {day, mins} = nyNow();
+  if (day === "Sat" || day === "Sun") return false;
+  return mins >= 570 && mins < 960; // 9:30–16:00
+}
+function todayNY(){
+  return new Intl.DateTimeFormat("en-CA", {timeZone:"America/New_York"}).format(new Date()); // YYYY-MM-DD
+}
+
+/* ---------------- indicators ---------------- */
+function sma(vals, n){
+  if (vals.length < n) return null;
+  let s = 0; for (let i = vals.length - n; i < vals.length; i++) s += vals[i];
+  return s / n;
+}
+function rsi14(closes){
+  const n = 14;
+  if (closes.length < n + 1) return null;
+  let gain = 0, loss = 0;
+  for (let i = 1; i <= n; i++){ const d = closes[i] - closes[i-1]; if (d > 0) gain += d; else loss -= d; }
+  let ag = gain/n, al = loss/n;
+  for (let i = n + 1; i < closes.length; i++){
+    const d = closes[i] - closes[i-1];
+    ag = (ag*(n-1) + Math.max(d,0)) / n;
+    al = (al*(n-1) + Math.max(-d,0)) / n;
+  }
+  if (al === 0) return 100;
+  return 100 - 100/(1 + ag/al);
+}
+
+/* ---------------- twelve data api ---------------- */
+async function td(path, params){
+  const u = new URL("https://api.twelvedata.com/" + path);
+  for (const [k,v] of Object.entries(params)) u.searchParams.set(k, v);
+  u.searchParams.set("apikey", state.apikey);
+  const r = await fetch(u);
+  const j = await r.json();
+  if (j && j.code && j.code !== 200 && j.status === "error") throw new Error(j.message || ("API error " + j.code));
+  return j;
+}
+
+async function fetchQuotes(symbols){
+  // batch request; single-symbol responses are the object itself, multi are keyed by symbol
+  const j = await td("quote", { symbol: symbols.join(",") });
+  const out = {};
+  if (symbols.length === 1){ out[symbols[0]] = j; }
+  else for (const s of symbols){
+    const v = j[s];
+    if (v && v.status === "error") continue; // bad symbol in batch — skip, keep the rest
+    if (v) out[s] = v;
+  }
+  return out;
+}
+
+async function fetchHistory(sym){
+  const j = await td("time_series", { symbol: sym, interval: "1day", outputsize: 270 });
+  if (!j.values) throw new Error("no history for " + sym);
+  const vals = j.values.slice().reverse(); // oldest → newest
+  return { date: todayNY(), dates: vals.map(v => v.datetime), closes: vals.map(v => parseFloat(v.close)) };
+}
+
+/* ---------------- polling loop ---------------- */
+function schedule(){
+  if (state.timer) clearInterval(state.timer);
+  state.timer = setInterval(tick, state.settings.interval * 60000);
+}
+async function tick(force){
+  if (state.polling) return;
+  if (!state.apikey || state.symbols.length === 0) return;
+  if (!force && state.settings.mktonly && !marketOpen()){
+    setStatus(false, "Market closed — polling paused (US hours). Use “Refresh now” to poll anyway.");
+    return;
+  }
+  state.polling = true;
+  try {
+    // 1) refresh daily history for any symbol missing today's cache (1 credit each, once/day)
+    const today = todayNY();
+    const stale = state.symbols.filter(rec => { const h = state.history[rec.sym]; return !h || h.date !== today; });
+    for (let i = 0; i < stale.length; i++){
+      setStatus(true, "Loading daily history for " + stale[i].sym + "…");
+      try { state.history[stale[i].sym] = await fetchHistory(stale[i].sym); store.set("history", state.history); }
+      catch(e){ /* keep stale history if present; quotes still work */ }
+      if (i < stale.length - 1) await new Promise(r => setTimeout(r, 8500)); // stay under 8 req/min
+    }
+    // 2) quotes, chunked for the rate limit
+    const syms = state.symbols.map(r => r.sym);
+    for (let i = 0; i < syms.length; i += CHUNK){
+      const chunk = syms.slice(i, i + CHUNK);
+      setStatus(true, "Fetching quotes: " + chunk.join(", ") + "…");
+      const q = await fetchQuotes(chunk);
+      Object.assign(state.quotes, q);
+      if (i + CHUNK < syms.length) await new Promise(r => setTimeout(r, CHUNK_GAP_MS));
+    }
+    evaluateAlerts();
+    render();
+    const t = new Date().toLocaleTimeString("en-US", {hour:"numeric", minute:"2-digit", second:"2-digit"});
+    setStatus(marketOpen(), "Updated " + t + (marketOpen() ? " · market open" : " · market closed (quotes may be last close)"));
+  } catch(e){
+    setStatus(false, "Error: " + e.message);
+  } finally {
+    state.polling = false;
+  }
+}
+function setStatus(live, msg){ $("livedot").className = "dot" + (live ? " live" : ""); $("status").textContent = msg; }
+
+/* ---------------- signals & alerts ---------------- */
+function analyse(sym){
+  const h = state.history[sym], q = state.quotes[sym];
+  const price = q ? parseFloat(q.close) : null;
+  const chg = q ? parseFloat(q.percent_change) : null;
+  const badges = [], events = []; // events → alerts; badges → table display
+
+  if (chg !== null && !isNaN(chg) && Math.abs(chg) >= state.settings.movepct)
+    events.push({ rule:"move", kind: chg > 0 ? "buyish" : "sellish",
+      msg: sym + " " + (chg>0?"▲ up ":"▼ down ") + fmt(Math.abs(chg),1) + "% today ($" + fmt(price) + ")" });
+
+  if (!h || h.closes.length < 60) return { price, rsi:null, badges, events, chg };
+
+  // provisional series = daily closes with today's live price appended/substituted
+  const closes = h.closes.slice();
+  if (price && h.dates[h.dates.length-1] !== todayNY()) closes.push(price);
+  else if (price) closes[closes.length-1] = price;
+
+  const r = rsi14(closes);
+  const s20 = sma(closes, 20), s50 = sma(closes, 50);
+  const y = closes.slice(0, -1); // series as of yesterday
+  const s20y = sma(y, 20), s50y = sma(y, 50);
+  const yr = closes.slice(-252);
+  const hi52 = Math.max(...yr), lo52 = Math.min(...yr);
+
+  if (r !== null){
+    if (r < 30){ badges.push({t:"RSI " + fmt(r,0) + " oversold", k:"buyish"});
+      if (state.settings.rsi) events.push({rule:"rsi-lo", kind:"buyish", msg: sym + " RSI is " + fmt(r,0) + " (oversold) — historically a level where dip-buyers look for entries. Not a prediction."}); }
+    else if (r > 70){ badges.push({t:"RSI " + fmt(r,0) + " overbought", k:"sellish"});
+      if (state.settings.rsi) events.push({rule:"rsi-hi", kind:"sellish", msg: sym + " RSI is " + fmt(r,0) + " (overbought) — a level where momentum often cools; some take profits here."}); }
+  }
+  if (s20 && s50){
+    if (s20y <= s50y && s20 > s50){ badges.push({t:"Golden cross", k:"buyish"});
+      if (state.settings.sma) events.push({rule:"gx", kind:"buyish", msg: sym + ": 20-day average crossed ABOVE the 50-day (golden cross) — a classic bullish trend signal."}); }
+    if (s20y >= s50y && s20 < s50){ badges.push({t:"Death cross", k:"sellish"});
+      if (state.settings.sma) events.push({rule:"dx", kind:"sellish", msg: sym + ": 20-day average crossed BELOW the 50-day (death cross) — a classic bearish trend signal."}); }
+    badges.push({t: price > s50 ? "above 50d avg" : "below 50d avg", k:""});
+  }
+  if (price && hi52 && lo52){
+    if (price <= lo52 * 1.02){ badges.push({t:"near 52w low", k:"buyish"});
+      if (state.settings.w52) events.push({rule:"lo52", kind:"buyish", msg: sym + " is within 2% of its 52-week low ($" + fmt(lo52) + ") — worth researching whether it's a bargain or falling for a reason."}); }
+    if (price >= hi52 * 0.98){ badges.push({t:"near 52w high", k:"sellish"});
+      if (state.settings.w52) events.push({rule:"hi52", kind:"", msg: sym + " is within 2% of its 52-week high ($" + fmt(hi52) + ") — strong momentum; breakout traders watch this, others trim."}); }
+  }
+  return { price, rsi:r, badges, events, chg };
+}
+
+function evaluateAlerts(){
+  const today = todayNY();
+  for (const rec of state.symbols){
+    const a = analyse(rec.sym);
+    if (a.price === null || a.price === undefined || isNaN(a.price)) continue;
+    // signal events: max once per day per (symbol, rule)
+    for (const ev of a.events){
+      const key = rec.sym + "|" + ev.rule;
+      if (state.fired[key] === today) continue;
+      state.fired[key] = today;
+      pushAlert(rec.sym, ev.kind, ev.msg);
+    }
+    // custom price levels: fire once, then disarm
+    if (rec.above !== null && a.price >= rec.above){
+      pushAlert(rec.sym, "buyish", rec.sym + " crossed ABOVE your alert level $" + fmt(rec.above) + " (now $" + fmt(a.price) + ")");
+      rec.above = null; saveSymbols();
+    }
+    if (rec.below !== null && a.price <= rec.below){
+      pushAlert(rec.sym, "sellish", rec.sym + " dropped BELOW your alert level $" + fmt(rec.below) + " (now $" + fmt(a.price) + ")");
+      rec.below = null; saveSymbols();
+    }
+  }
+  store.set("fired", state.fired);
+}
+
+function pushAlert(sym, kind, msg){
+  state.feed.unshift({ t: Date.now(), sym, kind, msg });
+  state.feed = state.feed.slice(0, 100);
+  store.set("feed", state.feed);
+  renderFeed();
+  if ("Notification" in window && Notification.permission === "granted"){
+    try { new Notification("📈 " + sym, { body: msg, tag: sym + msg.slice(0,40) }); } catch(e){}
+  }
+  if (state.settings.sound) beep();
+  document.title = "🔔 " + document.title.replace(/^🔔 /, "");
+}
+let audioCtx = null;
+function beep(){
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = 880; o.type = "sine";
+    g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+    o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.5);
+  } catch(e){}
+}
+
+/* ---------------- rendering ---------------- */
+function sparkline(closes){
+  const pts = closes.slice(-30);
+  if (pts.length < 2) return "";
+  const w = 96, h = 28, pad = 2;
+  const min = Math.min(...pts), max = Math.max(...pts), span = (max - min) || 1;
+  const step = (w - pad*2) / (pts.length - 1);
+  const d = pts.map((v,i) => (i ? "L" : "M") + (pad + i*step).toFixed(1) + " " + (h - pad - (v-min)/span*(h - pad*2)).toFixed(1)).join(" ");
+  const up = pts[pts.length-1] >= pts[0];
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="30-day price trend, '+(up?'up':'down')+' from $'+fmt(pts[0])+' to $'+fmt(pts[pts.length-1])+'">' +
+    '<title>30d: $'+fmt(min)+'–$'+fmt(max)+'</title>' +
+    '<path d="'+d+'" fill="none" stroke="#0d6e5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function render(){
+  const tb = $("rows");
+  tb.innerHTML = "";
+  $("emptymsg").style.display = state.symbols.length ? "none" : "block";
+  for (const rec of state.symbols){
+    const q = state.quotes[rec.sym], h = state.history[rec.sym];
+    const a = analyse(rec.sym);
+    const chg = q ? parseFloat(q.percent_change) : null;
+    const chgCls = chg === null || isNaN(chg) ? "" : (chg >= 0 ? "chg-up" : "chg-down");
+    const chgTxt = chg === null || isNaN(chg) ? "—" : (chg >= 0 ? "▲ +" : "▼ ") + fmt(chg) + "%";
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td><span class="sym">' + esc(rec.sym) + '</span>' + (q && q.name ? '<span class="name">' + esc(q.name) + '</span>' : '') + '</td>' +
+      '<td class="num">' + (a.price ? "$" + fmt(a.price) : "—") + '</td>' +
+      '<td class="num ' + chgCls + '">' + chgTxt + '</td>' +
+      '<td>' + (h ? sparkline(h.closes) : '<span style="color:var(--muted);font-size:12px">loading…</span>') + '</td>' +
+      '<td class="num">' + (a.rsi !== null ? fmt(a.rsi,0) : "—") + '</td>' +
+      '<td>' + (a.badges.length ? a.badges.map(b => '<span class="badge ' + b.k + '">' + esc(b.t) + '</span>').join("") : '<span style="color:var(--muted)">—</span>') + '</td>' +
+      '<td class="num"><label class="visually-hidden" for="ab-' + esc(rec.sym) + '">Alert when ' + esc(rec.sym) + ' rises above price</label><input class="lvl" id="ab-' + esc(rec.sym) + '" type="number" step="any" placeholder="$" value="' + (rec.above ?? "") + '" data-sym="' + esc(rec.sym) + '" data-dir="above"></td>' +
+      '<td class="num"><label class="visually-hidden" for="bl-' + esc(rec.sym) + '">Alert when ' + esc(rec.sym) + ' falls below price</label><input class="lvl" id="bl-' + esc(rec.sym) + '" type="number" step="any" placeholder="$" value="' + (rec.below ?? "") + '" data-sym="' + esc(rec.sym) + '" data-dir="below"></td>' +
+      '<td><button class="tiny ghost" data-remove="' + esc(rec.sym) + '" aria-label="Remove ' + esc(rec.sym) + '">✕</button></td>';
+    tb.appendChild(tr);
+  }
+  updateQuota();
+}
+
+function renderFeed(){
+  const ul = $("feed");
+  ul.innerHTML = "";
+  $("feedempty").style.display = state.feed.length ? "none" : "block";
+  for (const it of state.feed){
+    const li = document.createElement("li");
+    const d = new Date(it.t);
+    li.innerHTML = '<time>' + d.toLocaleDateString("en-US",{month:"short",day:"numeric"}) + " " + d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}) + '</time>' +
+      '<span class="k-' + esc(it.kind || "") + '">' + esc(it.msg) + '</span>';
+    ul.appendChild(li);
+  }
+}
+
+function updateQuota(){
+  const n = state.symbols.length;
+  if (!n){ $("quota").textContent = ""; return; }
+  const perPoll = n; // 1 credit per symbol per quote poll
+  const polls = Math.floor(390 / state.settings.interval); // trading minutes per day
+  const est = perPoll * polls + n; // + daily history
+  $("quota").textContent = "≈ " + est + " API credits/day at this pace (free tier: 800/day)" + (est > 750 ? " — over budget, raise the interval or trim the list" : "");
+}
+
+/* ---------------- events ---------------- */
+function saveSymbols(){ store.set("symbols", state.symbols); }
+
+$("savekey").addEventListener("click", () => {
+  state.apikey = $("apikey").value.trim();
+  store.set("apikey", state.apikey);
+  setStatus(false, state.apikey ? "Key saved. Add symbols or hit Refresh now." : "Key cleared.");
+  if (state.apikey) tick(true);
+});
+$("addbtn").addEventListener("click", addSymbol);
+$("addsym").addEventListener("keydown", e => { if (e.key === "Enter") addSymbol(); });
+function addSymbol(){
+  const s = $("addsym").value.trim().toUpperCase();
+  if (!s || !/^[A-Z0-9.:_-]{1,12}$/.test(s)) return;
+  if (state.symbols.some(r => r.sym === s)) { $("addsym").value = ""; return; }
+  if (state.symbols.length >= MAX_SYMBOLS){ setStatus(false, "Watchlist is capped at " + MAX_SYMBOLS + " symbols to respect the free API tier."); return; }
+  state.symbols.push({ sym: s, above: null, below: null });
+  saveSymbols(); $("addsym").value = ""; render();
+  if (state.apikey) tick(true);
+}
+$("rows").addEventListener("click", e => {
+  const s = e.target.getAttribute && e.target.getAttribute("data-remove");
+  if (!s) return;
+  state.symbols = state.symbols.filter(r => r.sym !== s);
+  delete state.quotes[s]; delete state.history[s];
+  saveSymbols(); store.set("history", state.history); render();
+});
+$("rows").addEventListener("change", e => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains("lvl")) return;
+  const rec = state.symbols.find(r => r.sym === t.dataset.sym);
+  if (!rec) return;
+  const v = parseFloat(t.value);
+  rec[t.dataset.dir] = isNaN(v) ? null : v;
+  saveSymbols();
+});
+$("refreshbtn").addEventListener("click", () => tick(true));
+$("notifbtn").addEventListener("click", async () => {
+  if (!("Notification" in window)){ $("notifbtn").textContent = "Notifications unsupported here"; return; }
+  const p = await Notification.requestPermission();
+  $("notifbtn").textContent = p === "granted" ? "✓ Notifications enabled" : "Notifications blocked — check browser settings";
+  $("notifbtn").disabled = p === "granted";
+});
+$("clearfeed").addEventListener("click", () => { state.feed = []; store.set("feed", []); renderFeed(); });
+$("interval").addEventListener("change", () => { state.settings.interval = parseInt($("interval").value,10); store.set("settings", state.settings); schedule(); updateQuota(); });
+$("mktonly").addEventListener("change", () => { state.settings.mktonly = $("mktonly").checked; store.set("settings", state.settings); });
+$("soundon").addEventListener("change", () => { state.settings.sound = $("soundon").checked; store.set("settings", state.settings); });
+$("movepct").addEventListener("change", () => { const v = parseFloat($("movepct").value); if (!isNaN(v) && v > 0){ state.settings.movepct = v; store.set("settings", state.settings); } });
+for (const [id, key] of [["sig-rsi","rsi"],["sig-sma","sma"],["sig-52w","w52"]]){
+  $(id).addEventListener("change", () => { state.settings[key] = $(id).checked; store.set("settings", state.settings); });
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) document.title = document.title.replace(/^🔔 /, "");
+});
+
+/* ---------------- init ---------------- */
+(function init(){
+  $("apikey").value = state.apikey;
+  $("interval").value = String(state.settings.interval);
+  $("mktonly").checked = state.settings.mktonly;
+  $("soundon").checked = state.settings.sound;
+  $("movepct").value = state.settings.movepct;
+  $("sig-rsi").checked = state.settings.rsi;
+  $("sig-sma").checked = state.settings.sma;
+  $("sig-52w").checked = state.settings.w52;
+  if ("Notification" in window && Notification.permission === "granted"){ $("notifbtn").textContent = "✓ Notifications enabled"; $("notifbtn").disabled = true; }
+  render(); renderFeed(); schedule();
+  if (state.apikey && state.symbols.length){ setStatus(false, "Restored watchlist — fetching…"); tick(true); }
+})();
+</script>
+</body>
+</html>
