@@ -1,0 +1,50 @@
+name: monthly-rebalance
+
+on:
+  schedule:
+    # Every weekday at 14:45 UTC (after the US open). The script only acts on the month's first trading day.
+    - cron: "45 14 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run, paper or live"
+        required: true
+        default: dry-run
+        type: choice
+        options: [dry-run, paper]
+      force:
+        description: "Run even if today is not the first trading day of the month"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rebalance
+  cancel-in-progress: false
+
+jobs:
+  rebalance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+      - name: Rebalance
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          MODE_INPUT: ${{ inputs.mode }}
+          FORCE_INPUT: ${{ inputs.force }}
+          DEFAULT_MODE: ${{ vars.BOT_MODE }}
+        run: |
+          MODE="${MODE_INPUT:-${DEFAULT_MODE:-dry-run}}"
+          case "$MODE" in dry-run|paper) ;; *) echo "mode '$MODE' not allowed from the workflow"; exit 1;; esac
+          EXTRA=""
+          if [ "$FORCE_INPUT" = "true" ]; then EXTRA="--force"; fi
+          python scripts/rebalance.py --mode "$MODE" $EXTRA

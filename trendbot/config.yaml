@@ -1,0 +1,18 @@
+# Trend bot configuration. Decisions are made once a month from completed month-end closes.
+strategy:
+  universe: [VOO, SOXX, IWM, VXUS, VWO, TLT, IEF, GLD, DBC]
+  cash_proxy: SGOV            # empty slots are parked in a T-bill ETF
+  top_n: 3                    # hold up to 3 funds at a time, 1/3 each
+  lookbacks_months: [3, 6, 12]
+  trend_window_months: 10     # a fund must be above its 10-month average to be held
+
+limits:
+  max_weight_per_asset: 0.40
+  max_total_invested: 0.99    # keep 1% uninvested for rounding and fees
+  per_asset_caps:
+    SOXX: 0.34                # single-sector fund: never more than about a third
+
+execution:
+  min_trade_dollars: 5
+  rebalance_band: 0.02        # skip trades smaller than 2% of the account (avoids churning)
+  data_feed: sip
