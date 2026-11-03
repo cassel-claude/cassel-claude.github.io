@@ -1,0 +1,6 @@
+pandas>=2.2
+numpy>=1.26
+requests>=2.31
+pyyaml>=6.0
+pytest>=8.0
+arch>=7.0          # only for the offline research datasets
